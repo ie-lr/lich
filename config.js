@@ -11,7 +11,7 @@
 
 const BACKEND_CONFIG = {
   // Enter your deployed Google Apps Script Web App URL here in backend code:
-  APPS_SCRIPT_URL: "",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbz5zx1d1kz6eeQ-ZTtgTZp7Kj4SU7WEvCFbRkYMe3YONRQAdJV0zt0bo-bt_akuFHkB/exec",
 
   // Enable automatic background sync on every change
   AUTO_SYNC: true,

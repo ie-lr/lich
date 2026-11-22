@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LITRICH Family Management System</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="description" content="LITRICH Family Management System - SMART Goals, Financial Tracking, Reminders & Google Sheets Sync">
+  <meta name="theme-color" content="#841B37">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LITRICH">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- ==========================================================================
+       Header Bar (Firestone Systems Layout Inspired)
+       ========================================================================== -->
+  <header class="system-header">
+    <div class="header-left">
+      <button class="mobile-menu-toggle" id="btnToggleSidebar" aria-label="Toggle Navigation Menu">☰</button>
+      <div class="header-logo-wrapper">
+        <img src="assets/icon-192.png" alt="LITRICH Logo" class="header-logo">
+        <div class="system-title-box">
+          <h1 class="system-title">LITRICH Family Management System</h1>
+          <span class="system-tagline">SMART Goals • Financial Growth • Reminders</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="sync-pill" id="syncStatusPill" title="Click to open Google Sheet Sync Settings">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="syncStatusText">Offline Ready</span>
+      </div>
+
+      <!-- One-Click PWA Install Button for Android & iPhone -->
+      <button class="btn-install-app" id="btnInstallPWA" title="Install App on Phone or Desktop">
+        <span>📲</span>
+        <span id="installBtnText">Install App</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       Main Layout (Sidebar + Content Panel with Transparent Couple Watermark)
+       ========================================================================== -->
+  <div class="main-wrapper">
+    
+    <!-- Left Navigation Sidebar (Firestone Menu Screen Style) -->
+    <aside class="firestone-sidebar" id="sidebarMenu">
+      <div class="sidebar-category">Overview & Noticeboard</div>
+      <button class="nav-item-btn active" data-view="dashboardView">
+        <span class="nav-icon">📢</span>
+        <span>Dashboard & Notices</span>
+        <span class="nav-badge" id="badgeReminderCount">0</span>
+      </button>
+
+      <div class="sidebar-category">SMART Goal Planning</div>
+      <button class="nav-item-btn" data-view="smartGoalWorksheetView">
+        <span class="nav-icon">🎯</span>
+        <span>New SMART Goal</span>
+      </button>
+      <button class="nav-item-btn" data-view="inProgressGoalsView">
+        <span class="nav-icon">🚀</span>
+        <span>In Progress Goals</span>
+        <span class="nav-badge" id="badgeProgressCount">0</span>
+      </button>
+      <button class="nav-item-btn" data-view="pendingGoalsView">
+        <span class="nav-icon">⏳</span>
+        <span>Pending Goals</span>
+        <span class="nav-badge" id="badgePendingCount">0</span>
+      </button>
+      <button class="nav-item-btn" data-view="achievedGoalsView">
+        <span class="nav-icon">🏆</span>
+        <span>Achieved Goals</span>
+        <span class="nav-badge" id="badgeAchievedCount">0</span>
+      </button>
+      <button class="nav-item-btn" data-view="allGoalsView">
+        <span class="nav-icon">📋</span>
+        <span>All Goals Master</span>
+        <span class="nav-badge" id="badgeAllGoalsCount">0</span>
+      </button>
+
+      <div class="sidebar-category">Income & Expenses</div>
+      <button class="nav-item-btn" data-view="addIncomeView">
+        <span class="nav-icon">💰</span>
+        <span>Add Income</span>
+      </button>
+      <button class="nav-item-btn" data-view="addExpenseView">
+        <span class="nav-icon">💵</span>
+        <span>Add Expense</span>
+      </button>
+      <button class="nav-item-btn" data-view="allIncomeTableView">
+        <span class="nav-icon">📈</span>
+        <span>All Income Table</span>
+      </button>
+      <button class="nav-item-btn" data-view="allExpensesTableView">
+        <span class="nav-icon">📉</span>
+        <span>All Expenses Table</span>
+      </button>
+
+      <div class="sidebar-category">System & Cloud</div>
+      <button class="nav-item-btn" data-view="settingsView">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings & Google Sheets</span>
+      </button>
+
+      <!-- Sidebar Couple Profile Card -->
+      <div class="sidebar-couple-card">
+        <img src="assets/couple-bg.jpg" alt="LITRICH Couple" class="sidebar-couple-img">
+        <div class="sidebar-couple-info">
+          <h4>LITRICH Family</h4>
+          <p>Together We Achieve</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Dynamic Content Canvas -->
+    <main class="content-area">
+      <div class="content-inner">
+
+        <!-- ==================================================================
+             VIEW 1: Dashboard & Announcements (Firestone Style Noticeboard)
+             ================================================================== -->
+        <section id="dashboardView" class="view-section active">
+          <!-- Company Announcements Style Hero -->
+          <div class="announcement-hero">
+            <div class="announcement-header">
+              <div class="announcement-title-row">
+                <img src="assets/icon-192.png" alt="Icon" style="width: 32px; height: 32px; border-radius: 50%;">
+                <div>
+                  <h2 class="announcement-title">Family Announcements & Reminders</h2>
+                  <p class="announcement-subtitle">LITRICH Family Active Notifications & Milestones</p>
+                </div>
+              </div>
+              <button class="btn-quick btn-quick-primary" onclick="window.litrichApp.switchView('smartGoalWorksheetView')">
+                + New Goal
+              </button>
+            </div>
+
+            <!-- Active Reminders Noticeboard (Appears when reminder date reaches, stays 7+ days) -->
+            <div id="activeRemindersContainer">
+              <!-- Dynamically populated reminders -->
+            </div>
+
+            <div class="announcement-quote" style="background: rgba(132, 27, 55, 0.04); border-left: 3px solid var(--color-gold); padding: 0.75rem 1rem; border-radius: 4px; font-style: italic; font-size: 0.85rem; color: var(--color-primary-dark); margin-top: 0.5rem;">
+              "Building our future with clarity, shared purpose, disciplined savings, and enduring love." — <strong>LITRICH Family</strong>
+            </div>
+          </div>
+
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon-box kpi-icon-income">💰</div>
+              <div class="kpi-details">
+                <span class="kpi-label">Total Income</span>
+                <span class="kpi-value" id="kpiTotalIncome">$0.00</span>
+                <span class="kpi-subtext" id="kpiIncomeCount">0 entries</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box kpi-icon-expense">💸</div>
+              <div class="kpi-details">
+                <span class="kpi-label">Total Expenses</span>
+                <span class="kpi-value" id="kpiTotalExpenses">$0.00</span>
+                <span class="kpi-subtext" id="kpiExpenseCount">0 entries</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box kpi-icon-savings">🏦</div>
+              <div class="kpi-details">
+                <span class="kpi-label">Net Available Funds</span>
+                <span class="kpi-value" id="kpiNetSavings">$0.00</span>
+                <span class="kpi-subtext">Income minus Expenses</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box kpi-icon-goals">🎯</div>
+              <div class="kpi-details">
+                <span class="kpi-label">Goals Status</span>
+                <span class="kpi-value" id="kpiGoalsRatio">0 / 0</span>
+                <span class="kpi-subtext" id="kpiGoalsSummary">Achieved / Total</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="quick-action-row">
+            <button class="btn-quick btn-quick-primary" onclick="window.litrichApp.switchView('smartGoalWorksheetView')">
+              🎯 Plan New SMART Goal
+            </button>
+            <button class="btn-quick btn-quick-income" onclick="window.litrichApp.switchView('addIncomeView')">
+              💰 Log Income
+            </button>
+            <button class="btn-quick btn-quick-expense" onclick="window.litrichApp.switchView('addExpenseView')">
+              💵 Log Expense
+            </button>
+            <button class="btn-quick" style="background: #2563EB; color: #FFF;" onclick="window.litrichApp.switchView('inProgressGoalsView')">
+              🚀 View Goal Progress
+            </button>
+          </div>
+
+          <!-- Active Goals Highlights Table on Dashboard -->
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>🚀 Active Goals In Progress</h3>
+                <p>Tracking budget raised, balance remaining, and target dates</p>
+              </div>
+              <button class="btn-secondary" onclick="window.litrichApp.switchView('inProgressGoalsView')">
+                View All In Progress &rarr;
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Goal Statement</th>
+                    <th>Target Budget</th>
+                    <th>Raised Amount</th>
+                    <th>Balance Due</th>
+                    <th>Progress</th>
+                    <th>Target Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardGoalsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 2: SMART Goal Setting Worksheet (Inspired by Image 2)
+             ================================================================== -->
+        <section id="smartGoalWorksheetView" class="view-section">
+          <div class="worksheet-container">
+            <div class="worksheet-header-banner">
+              <div class="worksheet-title-group">
+                <h2>SMART Goal Setting Worksheet</h2>
+                <p>Define clear, actionable family goals tied to your budget & income plan</p>
+              </div>
+              <div class="worksheet-badge">FAMILY GOAL PLAN</div>
+            </div>
+
+            <form id="goalForm" class="worksheet-form" onsubmit="window.litrichApp.handleSaveGoal(event)">
+              <input type="hidden" id="goalIdField">
+
+              <!-- Top: Goal Statement -->
+              <div class="form-group">
+                <label class="form-label" for="goalStatement">Goal Statement *</label>
+                <input type="text" id="goalStatement" class="form-input" placeholder="e.g. Purchase Family Vehicle / Build 6-Month Emergency Fund / Children Tuition Fund" required>
+              </div>
+
+              <!-- Middle: Left Why & Requirements, Right SMART Checklist (Layout from Image 2) -->
+              <div class="worksheet-grid">
+                <div class="worksheet-left-col">
+                  <div class="form-group">
+                    <label class="form-label" for="goalImportance">Why is this goal important? *</label>
+                    <textarea id="goalImportance" class="form-textarea" placeholder="Explain the family purpose, security, or comfort this goal brings..." required></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="goalRequirements">What is needed to accomplish this goal? *</label>
+                    <textarea id="goalRequirements" class="form-textarea" placeholder="Key prerequisites, monthly savings target, documentation, or steps required..." required></textarea>
+                  </div>
+                </div>
+
+                <!-- Right: SMART Checklist (Image 2) -->
+                <div class="worksheet-right-col">
+                  <div class="smart-checklist-card">
+                    <div class="smart-checklist-title">
+                      <span>✓</span> SMART Goal Checklist
+                    </div>
+                    <div class="checklist-items">
+                      <label class="checklist-item">
+                        <input type="checkbox" id="smartSpecific" class="checklist-checkbox" checked>
+                        <div class="checklist-text">
+                          <h5>Specific</h5>
+                          <p>Clear, well-defined statement</p>
+                        </div>
+                      </label>
+
+                      <label class="checklist-item">
+                        <input type="checkbox" id="smartMeasurable" class="checklist-checkbox" checked>
+                        <div class="checklist-text">
+                          <h5>Measurable</h5>
+                          <p>Concrete financial figures</p>
+                        </div>
+                      </label>
+
+                      <label class="checklist-item">
+                        <input type="checkbox" id="smartAttainable" class="checklist-checkbox" checked>
+                        <div class="checklist-text">
+                          <h5>Attainable</h5>
+                          <p>Realistic within family earnings</p>
+                        </div>
+                      </label>
+
+                      <label class="checklist-item">
+                        <input type="checkbox" id="smartRelevant" class="checklist-checkbox" checked>
+                        <div class="checklist-text">
+                          <h5>Relevant</h5>
+                          <p>Aligns with LITRICH family future</p>
+                        </div>
+                      </label>
+
+                      <label class="checklist-item">
+                        <input type="checkbox" id="smartTimeBound" class="checklist-checkbox" checked>
+                        <div class="checklist-text">
+                          <h5>Time-Bound</h5>
+                          <p>Has achievable target date & reminders</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial & Reminder Fields -->
+              <div class="financial-fields-grid">
+                <div class="form-group">
+                  <label class="form-label" for="goalTargetBudget">Target Budget ($) *</label>
+                  <input type="number" id="goalTargetBudget" class="form-input" min="0" step="0.01" placeholder="5000.00" required oninput="window.litrichApp.updateGoalLiveCalc()">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalRaisedAmount">Initial Raised / Saved ($)</label>
+                  <input type="number" id="goalRaisedAmount" class="form-input" min="0" step="0.01" value="0.00" oninput="window.litrichApp.updateGoalLiveCalc()">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalIncomeSource">Planned Source of Income</label>
+                  <input type="text" id="goalIncomeSource" class="form-input" placeholder="e.g. Monthly Salary, Bonus, Business Dividends">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalAchievableDate">Achievable Date (Target Deadline) *</label>
+                  <input type="date" id="goalAchievableDate" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalReminderDate">Reminder Date *</label>
+                  <input type="date" id="goalReminderDate" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalStatus">Status *</label>
+                  <select id="goalStatus" class="form-select" required onchange="window.litrichApp.updateGoalLiveCalc()">
+                    <option value="Pending">Pending (Not Started)</option>
+                    <option value="In Progress" selected>In Progress (Active)</option>
+                    <option value="Achieved">Achieved (Completed)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Reminder Message Field -->
+              <div class="form-group">
+                <label class="form-label" for="goalReminderMessage">Reminder Message (Displays in Dashboard Noticeboard on Reminder Date)</label>
+                <input type="text" id="goalReminderMessage" class="form-input" placeholder="e.g. Review car savings balance! Target $5,000 achievable in 60 days.">
+              </div>
+
+              <!-- Live Goal Calculation Box (Automatically raised xyz, balance xyz) -->
+              <div class="goal-live-calc-box">
+                <div class="goal-calc-item">
+                  <span class="goal-calc-label">Target Budget</span>
+                  <span class="goal-calc-val" id="calcTargetBudget">$0.00</span>
+                </div>
+                <div class="goal-calc-item">
+                  <span class="goal-calc-label">Amount Raised</span>
+                  <span class="goal-calc-val" id="calcRaisedAmount" style="color: #10B981;">$0.00</span>
+                </div>
+                <div class="goal-calc-item">
+                  <span class="goal-calc-label">Remaining Balance</span>
+                  <span class="goal-calc-val" id="calcBalanceAmount" style="color: var(--color-primary);">$0.00</span>
+                </div>
+                <div class="goal-calc-item">
+                  <span class="goal-calc-label">Progress</span>
+                  <span class="goal-calc-val" id="calcProgressPercent">0%</span>
+                </div>
+
+                <div class="goal-progress-bar-wrap">
+                  <div class="goal-progress-bar-fill" id="calcProgressBar" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="form-actions-row">
+                <button type="button" class="btn-secondary" onclick="window.litrichApp.resetGoalForm()">Clear Form</button>
+                <button type="submit" class="btn-primary" id="btnSubmitGoal">💾 Save Family Goal</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 3: Achieved Goals (Table Tab)
+             ================================================================== -->
+        <section id="achievedGoalsView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>🏆 All Achieved Goals</h3>
+                <p>Milestones successfully reached and celebrated by LITRICH Family</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search achieved goals..." oninput="window.litrichApp.filterTable('achieved', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('smartGoalWorksheetView')">+ New Goal</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Goal Statement</th>
+                    <th>Importance</th>
+                    <th>Target Budget</th>
+                    <th>Final Raised</th>
+                    <th>Target Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="achievedGoalsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 4: Pending Goals (Table Tab)
+             ================================================================== -->
+        <section id="pendingGoalsView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>⏳ All Pending Goals</h3>
+                <p>Goals planned and queued for future funding and execution</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search pending goals..." oninput="window.litrichApp.filterTable('pending', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('smartGoalWorksheetView')">+ New Goal</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Goal Statement</th>
+                    <th>Target Budget</th>
+                    <th>Planned Income Source</th>
+                    <th>Achievable Date</th>
+                    <th>Reminder Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pendingGoalsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 5: In Progress / Existing Goals (Table Tab)
+             ================================================================== -->
+        <section id="inProgressGoalsView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>🚀 Existing In Progress Goals</h3>
+                <p>Active goals with continuous income accumulation & balance tracking</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search active goals..." oninput="window.litrichApp.filterTable('inProgress', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('addIncomeView')">+ Add Income to Goal</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Goal Statement</th>
+                    <th>Target Budget</th>
+                    <th>Raised Amount</th>
+                    <th>Balance Due</th>
+                    <th>Progress</th>
+                    <th>Target Date</th>
+                    <th>Reminder Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inProgressGoalsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 6: All Goals Master Table (Tab)
+             ================================================================== -->
+        <section id="allGoalsView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>📋 Master Goals Directory</h3>
+                <p>Complete record of all family goals across all stages</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search all goals..." oninput="window.litrichApp.filterTable('allGoals', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('smartGoalWorksheetView')">+ New Goal</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Goal Statement</th>
+                    <th>Target Budget</th>
+                    <th>Raised</th>
+                    <th>Balance</th>
+                    <th>Progress</th>
+                    <th>Target Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allGoalsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 7: Add Income
+             ================================================================== -->
+        <section id="addIncomeView" class="view-section">
+          <div class="worksheet-container" style="max-width: 760px; margin: 0 auto 2rem auto;">
+            <div class="worksheet-header-banner" style="background: linear-gradient(135deg, #065F46 0%, #047857 100%);">
+              <div class="worksheet-title-group">
+                <h2>💰 Log Family Income</h2>
+                <p>Record incoming earnings and optionally allocate directly to an existing goal</p>
+              </div>
+              <div class="worksheet-badge" style="border-color: #6EE7B7; color: #A7F3D0;">INCOME ENTRY</div>
+            </div>
+
+            <form id="incomeForm" class="worksheet-form" onsubmit="window.litrichApp.handleSaveIncome(event)">
+              <div class="form-group">
+                <label class="form-label" for="incomeAmount">Income Amount ($) *</label>
+                <input type="number" id="incomeAmount" class="form-input" min="0.01" step="0.01" placeholder="1500.00" required>
+              </div>
+
+              <div class="worksheet-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                  <label class="form-label" for="incomeSource">Income Source *</label>
+                  <select id="incomeSource" class="form-select" required>
+                    <option value="">-- Select Source --</option>
+                    <option value="Salary (Husband)">Salary (Husband)</option>
+                    <option value="Salary (Wife)">Salary (Wife)</option>
+                    <option value="Business Revenue">Business Revenue</option>
+                    <option value="Consulting / Freelance">Consulting / Freelance</option>
+                    <option value="Investments / Dividends">Investments / Dividends</option>
+                    <option value="Gift / Support">Gift / Support</option>
+                    <option value="Other Source">Other Source</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="incomeDate">Date Received *</label>
+                  <input type="date" id="incomeDate" class="form-input" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="incomeSavingAccount">Savings Account / Destination *</label>
+                <select id="incomeSavingAccount" class="form-select" required>
+                  <option value="Family Joint Savings">Family Joint Savings</option>
+                  <option value="Emergency Reserve Fund">Emergency Reserve Fund</option>
+                  <option value="High-Yield Investment Account">High-Yield Investment Account</option>
+                  <option value="Daily Checking Account">Daily Checking Account</option>
+                  <option value="Cash Vault">Cash Vault</option>
+                </select>
+              </div>
+
+              <!-- Tie to Existing Goal (As requested: automatically attaches that particular goal status: raised xyz balance xyz) -->
+              <div class="form-group" style="background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: var(--radius-md); padding: 1rem;">
+                <label class="form-label" for="incomeTiedGoal" style="color: #065F46;">
+                  🎯 Tie Income to an Existing Goal (Optional)
+                </label>
+                <p style="font-size: 0.78rem; color: #166534; margin-bottom: 0.5rem;">
+                  When selected, this amount will automatically increase the goal's raised balance and recalculate remaining balance!
+                </p>
+                <select id="incomeTiedGoal" class="form-select" onchange="window.litrichApp.previewGoalTie(this.value)">
+                  <option value="">None (General Family Savings - No Goal)</option>
+                  <!-- Dynamically populated goals -->
+                </select>
+                <div id="goalTiePreviewBox" style="display: none; margin-top: 0.75rem; font-size: 0.82rem; font-weight: 600; color: #15803D; background: #DCFCE7; padding: 0.5rem 0.75rem; border-radius: 4px;"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="incomeNotes">Notes / Description</label>
+                <input type="text" id="incomeNotes" class="form-input" placeholder="e.g. November 2026 Monthly Salary bonus allocation">
+              </div>
+
+              <div class="form-actions-row">
+                <button type="submit" class="btn-primary" style="background: #059669;">💰 Record Income</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 8: Add Expense
+             ================================================================== -->
+        <section id="addExpenseView" class="view-section">
+          <div class="worksheet-container" style="max-width: 760px; margin: 0 auto 2rem auto;">
+            <div class="worksheet-header-banner" style="background: linear-gradient(135deg, #991B1B 0%, #B91C1C 100%);">
+              <div class="worksheet-title-group">
+                <h2>💵 Log Family Expense</h2>
+                <p>Record expenditures with purpose, date, and source of funds</p>
+              </div>
+              <div class="worksheet-badge" style="border-color: #FCA5A5; color: #FEE2E2;">EXPENSE ENTRY</div>
+            </div>
+
+            <form id="expenseForm" class="worksheet-form" onsubmit="window.litrichApp.handleSaveExpense(event)">
+              <div class="form-group">
+                <label class="form-label" for="expenseAmount">Expense Amount ($) *</label>
+                <input type="number" id="expenseAmount" class="form-input" min="0.01" step="0.01" placeholder="250.00" required>
+              </div>
+
+              <div class="worksheet-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                  <label class="form-label" for="expensePurpose">Purpose / Category *</label>
+                  <select id="expensePurpose" class="form-select" required>
+                    <option value="">-- Select Purpose --</option>
+                    <option value="Housing & Rent / Mortgage">Housing & Rent / Mortgage</option>
+                    <option value="Food & Groceries">Food & Groceries</option>
+                    <option value="Utilities & Bills (Power, Water, Net)">Utilities & Bills (Power, Water, Net)</option>
+                    <option value="Children & Education">Children & Education</option>
+                    <option value="Healthcare & Medical">Healthcare & Medical</option>
+                    <option value="Transportation & Fuel">Transportation & Fuel</option>
+                    <option value="Family Clothing & Personal">Family Clothing & Personal</option>
+                    <option value="Goal Execution Purchase">Goal Execution Purchase</option>
+                    <option value="Entertainment & Dining">Entertainment & Dining</option>
+                    <option value="Other Expense">Other Expense</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="expenseDate">Expense Date *</label>
+                  <input type="date" id="expenseDate" class="form-input" required>
+                </div>
+              </div>
+
+              <!-- Used From (As requested: tie to existing income with Non option) -->
+              <div class="form-group">
+                <label class="form-label" for="expenseUsedFrom">
+                  Used From (Tie to Income / Account Source with "None" Option) *
+                </label>
+                <select id="expenseUsedFrom" class="form-select" required>
+                  <option value="None">None (General Out of Pocket / Miscellaneous)</option>
+                  <option value="Family Joint Savings">Family Joint Savings</option>
+                  <option value="Daily Checking Account">Daily Checking Account</option>
+                  <option value="Emergency Reserve Fund">Emergency Reserve Fund</option>
+                  <option value="Cash Vault">Cash Vault</option>
+                  <!-- Populated with recent income entries -->
+                </select>
+              </div>
+
+              <!-- Optional tie to goal -->
+              <div class="form-group">
+                <label class="form-label" for="expenseTiedGoal">Associated Goal (Optional)</label>
+                <select id="expenseTiedGoal" class="form-select">
+                  <option value="">None (Standard Routine Expense)</option>
+                  <!-- Populated with goals -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="expenseNotes">Notes / Description</label>
+                <input type="text" id="expenseNotes" class="form-input" placeholder="e.g. Weekly grocery shopping at market">
+              </div>
+
+              <div class="form-actions-row">
+                <button type="submit" class="btn-primary" style="background: #DC2626;">💵 Record Expense</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 9: All Income Table (Tab)
+             ================================================================== -->
+        <section id="allIncomeTableView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>📈 All Income Records</h3>
+                <p>Complete historical list of family earnings and deposits</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search income..." oninput="window.litrichApp.filterTable('income', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('addIncomeView')">+ Add Income</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Source</th>
+                    <th>Amount</th>
+                    <th>Saving Account</th>
+                    <th>Tied Goal</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allIncomeTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 10: All Expenses Table (Tab)
+             ================================================================== -->
+        <section id="allExpensesTableView" class="view-section">
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title-group">
+                <h3>📉 All Expense Records</h3>
+                <p>Complete record of expenditures with source and purpose</p>
+              </div>
+              <div class="table-controls">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" class="search-input" placeholder="Search expenses..." oninput="window.litrichApp.filterTable('expenses', this.value)">
+                </div>
+                <button class="btn-primary" onclick="window.litrichApp.switchView('addExpenseView')">+ Add Expense</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Purpose</th>
+                    <th>Amount</th>
+                    <th>Used From</th>
+                    <th>Tied Goal</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allExpensesTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 11: Settings & Google Sheets Sync
+             ================================================================== -->
+        <section id="settingsView" class="view-section">
+          <div class="settings-grid">
+            
+            <!-- Google Sheets Integration Card -->
+            <div class="settings-card">
+              <h3><span>📊</span> Google Sheets & Apps Script Sync</h3>
+              <p>Connect your LITRICH system directly to Google Sheets using Google Apps Script for real-time cloud backup across all family devices.</p>
+              
+              <div class="form-group">
+                <label class="form-label" for="inputAppsScriptUrl">Google Apps Script Web App URL</label>
+                <input type="url" id="inputAppsScriptUrl" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <button class="btn-primary" onclick="window.litrichApp.saveAndSyncGoogleSheets()">🔗 Connect & Sync Now</button>
+                <button class="btn-secondary" onclick="window.litrichApp.pullFromGoogleSheets()">⬇️ Pull from Sheet</button>
+              </div>
+
+              <div id="syncFeedbackBox" style="font-size: 0.8rem; color: var(--text-muted);">
+                Status: Local storage active. Cloud sync optional.
+              </div>
+            </div>
+
+            <!-- 1-Click PWA Installation Card -->
+            <div class="settings-card">
+              <h3><span>📱</span> Install App Icon on Android & iPhone</h3>
+              <p>Install LITRICH as a native application on your phone with the couple logo icon and offline capability.</p>
+
+              <button class="btn-install-app" style="margin-bottom: 1rem;" onclick="window.litrichApp.triggerPWAInstall()">
+                📲 Install App on This Device
+              </button>
+
+              <div class="ios-step" style="margin-top: 1rem;">
+                <div class="ios-step-number">🤖</div>
+                <div class="ios-step-text">
+                  <h4>Android / Chrome / Edge</h4>
+                  <p>Click the "Install App" button in the header bar or menu to add the app directly to your phone screen.</p>
+                </div>
+              </div>
+
+              <div class="ios-step">
+                <div class="ios-step-number">🍏</div>
+                <div class="ios-step-text">
+                  <h4>iPhone / iPad (Safari)</h4>
+                  <p>Tap the <strong>Share</strong> button (box with upward arrow) at the bottom, then choose <strong>"Add to Home Screen"</strong>.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data Backup & CSV Export Card -->
+            <div class="settings-card">
+              <h3><span>💾</span> Local Backup & Export</h3>
+              <p>Export your full family financial and goal data as JSON or CSV files anytime.</p>
+              
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn-secondary" onclick="window.litrichApp.exportJSON()">📤 Backup JSON</button>
+                <button class="btn-secondary" onclick="window.litrichApp.exportCSV('goals')">📊 Export Goals CSV</button>
+                <button class="btn-secondary" onclick="window.litrichApp.exportCSV('income')">📈 Export Income CSV</button>
+                <button class="btn-secondary" onclick="window.litrichApp.exportCSV('expenses')">📉 Export Expenses CSV</button>
+              </div>
+            </div>
+
+            <!-- Google Apps Script Quick Deployment Helper -->
+            <div class="settings-card" style="grid-column: 1 / -1;">
+              <h3><span>⚡</span> Google Apps Script Code (`Code.gs`)</h3>
+              <p>To connect to Google Sheets, copy the code from the project's <code>Code.gs</code> file into your Google Sheet's <strong>Extensions > Apps Script</strong> editor and deploy as a Web App (access: Anyone).</p>
+              <div class="code-block-box">
+                // Complete code is available in Code.gs in the repository root.<br>
+                // Deploy as Web App -> Execute as: Me -> Who has access: Anyone.<br>
+                // Copy the Web App URL and paste it into the field above!
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODALS
+     ========================================================================== -->
+
+<!-- iOS Step by Step Install Guide Modal -->
+<div class="modal-overlay" id="iosInstallModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📲 Install LITRICH on iPhone / iPad</h3>
+      <button class="modal-close" onclick="window.litrichApp.closeModal('iosInstallModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <img src="assets/icon-192.png" alt="LITRICH App Icon" style="width: 72px; height: 72px; border-radius: 16px; border: 2px solid var(--color-gold); box-shadow: var(--shadow-md);">
+        <h4 style="margin-top: 0.5rem; color: var(--color-primary-dark);">LITRICH Family Management System</h4>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Add to your Home Screen in 3 easy steps</p>
+      </div>
+
+      <div class="ios-step">
+        <div class="ios-step-number">1</div>
+        <div class="ios-step-text">
+          <h4>Tap the Safari Share button</h4>
+          <p>Look for the square icon with an arrow pointing up ⎋ at the bottom of your Safari browser bar.</p>
+        </div>
+      </div>
+
+      <div class="ios-step">
+        <div class="ios-step-number">2</div>
+        <div class="ios-step-text">
+          <h4>Select "Add to Home Screen"</h4>
+          <p>Scroll down through the share sheet options and tap <strong>"Add to Home Screen"</strong> (with the plus sign ➕).</p>
+        </div>
+      </div>
+
+      <div class="ios-step">
+        <div class="ios-step-number">3</div>
+        <div class="ios-step-text">
+          <h4>Tap "Add" in the top-right</h4>
+          <p>The LITRICH couple icon will appear right alongside your other phone apps!</p>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width: 100%; margin-top: 1rem;" onclick="window.litrichApp.closeModal('iosInstallModal')">
+        Got it!
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal Details & Actions Modal -->
+<div class="modal-overlay" id="goalDetailModal">
+  <div class="modal-box" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 id="modalGoalTitle">Goal Details</h3>
+      <button class="modal-close" onclick="window.litrichApp.closeModal('goalDetailModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="modalGoalContent">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- JavaScript Core -->
+<script src="app.js"></script>
+
+</body>
+</html>
